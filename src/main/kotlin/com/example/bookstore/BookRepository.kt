@@ -14,14 +14,19 @@ import javax.inject.Singleton
 
 @Singleton
 class BookRepository @Inject constructor(
-    private val config: BookstoreConfiguration,
     private var dslContext: DSLContext
 ) {
 
     private val table = BookMappingTable()
 
     private val mapper =
-        RecordMapper<Record, Book> { record -> Book(record[table.id].toString(), record[table.author], record[table.title]) }
+        RecordMapper<Record, Book> { record ->
+            Book(
+                record[table.id].toString(),
+                record[table.author],
+                record[table.title]
+            )
+        }
 
     fun findAll(): List<Book> {
         return dslContext.select(table.id, table.author, table.title).from(table).fetch(mapper)
@@ -32,6 +37,30 @@ class BookRepository @Inject constructor(
             .columns(table.id, table.author, table.title)
             .values(UUID.fromString(book.id), book.author, book.title)
             .execute()
+    }
+
+    fun findById(id: String): Book {
+        return dslContext
+            .select(table.id, table.author, table.title)
+            .from(table)
+            .where(table.id.equal(UUID.fromString(id)))
+            .fetchOne(mapper)!!
+    }
+
+    fun findByAuthor(author: String): List<Book> {
+        return dslContext
+            .select(table.id, table.author, table.title)
+            .from(table)
+            .where(table.author.equal(author))
+            .fetch(mapper)
+    }
+
+    fun findByTitle(title: String): List<Book> {
+        return dslContext
+            .select(table.id, table.author, table.title)
+            .from(table)
+            .where(table.title.equal(title))
+            .fetch(mapper)
     }
 
 }

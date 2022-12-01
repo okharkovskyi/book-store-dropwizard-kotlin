@@ -19,7 +19,6 @@ class BookstoreConfiguration(
 
 class BookstoreApp : Application<BookstoreConfiguration>() {
     override fun run(configuration: BookstoreConfiguration?, environment: Environment?) {
-//        environment?.jersey()?.register(BookController::class)
         guiceBundle.injector.getInstance(FlywayMigration::class.java).run()
     }
 
